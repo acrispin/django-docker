@@ -1,0 +1,14 @@
+version: "2"
+
+services:
+    # Se comenta seccion de servicio db debido a que se usa la base de datos de la maquina host o la que ejecuta los contenedores
+    # db:
+    #     image: postgres:9.5 # corre la imagen oficial de postgres con la version 9.5
+    #     env_file: .env # indica el archivo el cual se va a crear las variables de entorno y poder usarlas por el contenedor
+    #     volumes: # para que los datos de la bd persista en la maquina host
+    #         - db_data:/var/lib/postgresql/data/pgdata
+
+    web:
+        build: # para que construya la imagen
+            context: ./src
+        env_file: .env

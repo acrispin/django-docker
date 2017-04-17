@@ -1,0 +1,33 @@
+version: '2'
+
+# compose para desarrollo, se podria poner como archivo 'dev.yml' pero para facilidad de comandos al ejecutar el contenedor se deja con el nombre original
+# eso implica que no se va a tener que especificar el archivo compose al momento de llamar al comando 'docker-compose'
+
+services:
+    # Se comenta seccion de servicio 'db' debido a que se usa la base de datos de la maquina host o la que ejecuta los contenedores
+    # db:
+    #     extends:
+    #         file: base.yml # hereda del archivo compose indicado
+    #         service: db # hereda el servicio indicado
+
+    web:
+        extends:
+            file: base.yml
+            service: web
+        build:
+            args: # indica que al momento de construir la imagen indicada del servicio que hereda, esta le pase como argumente el sete de la variable de entorno
+                - DJANGO_ENV=dev # se setea la variable de entorno 'DJANGO_ENV' a 'dev' para que use los settings y requirements de desarrollo
+        command: python manage.py runserver 0.0.0.0:8000 # solo para desarrollo, para produccion usar por ejemplo gunicorn
+        volumes: # para desarrollo, cuando se edita un archivo .py o statico(.js, .css, .html, etc) este pueda sincronizarse con el archivo del contenedor y se vean los cambios en la app ejecutandose
+            - ./src:/webapp
+        ports: # para enlazar o mapear los puertos de la maquina host y del contenedor, el primer puerto '8123' es de la maquina host
+            - "8123:8000"
+        # depends_on: # indica que depende del servicio o contenedor que ejecuta la bd
+        #     - db
+        extra_hosts: # como se usa la bd de la maquina host, se crea una variable con la ip de la maquina host para que pueda ser referenciado por el backend de django
+            - "databasehost:192.168.1.39"
+
+# # indica para que se creen los volumenes persistentes
+# volumes:
+#     db_data:
+#         external: true

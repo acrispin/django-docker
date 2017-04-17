@@ -1,0 +1,87 @@
+Pasos:
+0 Crear la carpeta principal y dentro crear la carpeta src
+
+1 Crear el archivo Dockerfile en la carpeta 'src'
+
+2 Crear el archivo requiremnts.txt en la carpeta 'src'
+
+3 Crear el archivo docker-compose.yml y el archivo .env en la raiz
+
+4 Crear el proyecto de django con el nombre de 'project_name' dentro de la carpeta creada 'src' con el comando, este comando se debe ejecutar en la raiz:
+    $ docker-compose run web django-admin.py startproject project_name ../webapp
+  Otra forma de crear el proyecto usando un template de django de github
+    $ docker-compose run web django-admin.py startproject --template=https://github.com/acrispin/django-project-template/archive/dev.zip --extension=py,gitignore project_name ../webapp
+
+5 Luego ejecutar el comando en la raiz para cambiar de propetario debido a que el contenedor de docker crea las carpetas y archivos con el usuario root
+    $ sudo chown -R $USER:$USER .
+
+6 Levantar o ejecutar el contenedor con el comando en la raiz:
+    $ docker-compose up -d
+
+7 Para verificar que el contenedor se este ejecutando correctamente
+    $ docker ps
+    $ docker logs NAME_CONTAINER
+    $ docker logs -f NAME_CONTAINER
+
+8 Bajar o destruir los contenedores
+    $ docker-compose down
+
+9 Ordenar los archivos 'settings' para buena practica de django, desde la raiz
+    $ cd src/project_name
+  Crear el directorio settings
+    $ mkdir settings
+  Crear el archivo __init__.py para que reconozca la carpeta 'settings' como modulo de python e inicialize lo que se indique al cargar el modulo
+    $ touch settings/__init__.py
+  Mover el archivo 'settings.py' dentro de la carpeta 'settings' y renombrarlo a 'base.py'
+    $ mv settings.py settings/base.py
+  Crear el archivo 'dev.py' dentro de 'settings' para inicializar los settings del proyecto para el entorno de desarrollo
+    $ touch settings/dev.py
+  Editar los archivos 'base.py' y 'dev.py'
+
+10 Ordenar los archivos 'requirements' para generarlos segun entorno de desarrollo, desde la carpeta 'src' ejecutar los comandos
+  Crear el directorio 'requirements'
+    $ mkdir requirements
+  Mover el archivo 'requirements.txt' a la carpeta 'requirements' y renombrarlo a 'base.txt'
+    $ mv requirements.txt requirements/base.txt
+  Crear el archivo 'dev.txt' dentro de la carpeta 'requirement'
+    $ touch requirements/dev.txt
+  Editar los archivos 'dev.txt' y que comienze con la linea '-r base.txt' para que indique que herede las dependencias de 'base.txt'
+
+11 Ordenar los archivos de docker-compose, se ejecuta los comandos desde la raiz
+  Crear el archivo base.yml
+    $ touch base.yml
+
+12 Con los pasos 9, 10 y 11 que se ordenaron y editaron los archivos se debe volver a reconstruir la imagen con el siguiente comando en la raiz
+    $ docker-compose build web
+
+13 Volver a subir el contenedor
+    $ docker-compose up -d
+
+14 Verificar el contenedor
+    $ docker-compose ps
+   Mostrando mas informacion como imagen relacionada
+    $ docker ps
+   Ver logs con el nombre del contenedor
+    $ docker logs djangotemplate_web_1
+   Ver logs en vivo
+    $ docker logs -f djangotemplate_web_1
+   Ver logs con docker-compose usando el nombre del servicio levantado
+    $ docker-compose logs web
+   Ver logs con docker-compose usando el nombre del servicio en vivo
+    $ docker-compose logs -f web
+   Conectarse a la terminal del contenedor por el nombre (ctrl+D o el comando 'exit' para salir del bash del contenedor)
+    $ docker exec -it djangotemplate_web_1 bash
+
+15 Ejecucion para entornos de produccion
+   Se creara un docker compose para produccion y editarlo segun entorno, ejm: prod.yml
+   Cambiar el archivo de variables de entorno '.env', actualizar las variables asi como la variable 'DJANGO_SETTINGS_MODULE' y hacer apuntar al settings de produccion
+   Ejemplo:
+       DJANGO_SETTINGS_MODULE=myapp.settings.prod
+   Luego para levantar el contenedor de produccion, (con el flag 'f' se indica el archivo compose) ejecutar el siguinte comando
+    $ docker-compose -f prod.yml up -d
+   Se puede ejecutar los demas comandos para el compose de produccion, ejemplo:
+    $ docker-compose -f prod.yml build
+    $ docker-compose -f prod.yml ps
+    $ docker-compose -f prod.yml run
+    $ docker-compose -f prod.yml logs -f web
+    $ docker-compose -f prod.yml down
